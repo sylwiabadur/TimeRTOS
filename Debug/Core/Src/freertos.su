@@ -1,0 +1,6 @@
+freertos.c:81:13:vApplicationStackOverflowHook	16	static
+freertos.c:93:6:vApplicationGetIdleTaskMemory	24	static
+freertos.c:107:6:MX_FREERTOS_Init	104	static
+freertos.c:154:6:StartBlink01	32	static
+freertos.c:178:6:StartBlink02	32	static
+freertos.c:210:6:StartBlink03	32	static
