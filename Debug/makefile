@@ -49,7 +49,7 @@ all: thread_test.elf secondary-outputs
 
 # Tool invocations
 thread_test.elf: $(OBJS) $(USER_OBJS) C:\Users\Sylwia_Badur\STM32CubeIDE\workspace_1.3.0\thread_test\STM32F411VETX_FLASH.ld
-	arm-none-eabi-gcc -o "thread_test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Sylwia_Badur\STM32CubeIDE\workspace_1.3.0\thread_test\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="thread_test.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "thread_test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Sylwia_Badur\STM32CubeIDE\workspace_1.3.0\thread_test\STM32F411VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="thread_test.map" -Wl,--gc-sections -static  -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

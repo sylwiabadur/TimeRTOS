@@ -23,6 +23,7 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
+#include "wr_czas.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
@@ -51,6 +52,8 @@
 /* USER CODE BEGIN Variables */
 ADC_HandleTypeDef hadc1;
 UART_HandleTypeDef huart1;
+
+struct wr_czas czas;
 
 uint16_t raw;
 char msg[10];
@@ -162,6 +165,14 @@ void StartBlink01(void const * argument)
 	srand(time(0));
 	int num = (rand() % (10000 - 100 + 1)) + 100;
 	HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_12);
+
+	wr_czas_us aktualnyCzas = czas.czas_aktualny();
+
+	osDelay(num);
+
+	HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_12);
+	int32_t roznica = czas.roznica_czasu(&aktualnyCzas);
+
 	osDelay(num);
   }
   osThreadTerminate(NULL);
@@ -194,6 +205,9 @@ void StartBlink02(void const * argument)
 	  srand(time(0));
 	  int num = (rand() % (10000 - 100 + 1)) + 100;
 	  HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_13);
+
+	  wr_czas_us aktualnyCzas = czas.czas_aktualny();
+
 	  osDelay(num);
   }
   osThreadTerminate(NULL);
@@ -209,6 +223,7 @@ void StartBlink02(void const * argument)
 /* USER CODE END Header_StartBlink03 */
 void StartBlink03(void const * argument)
 {
+	struct timespec ts;
   /* USER CODE BEGIN StartBlink03 */
   /* Infinite loop */
   for(;;)
@@ -216,6 +231,12 @@ void StartBlink03(void const * argument)
 	  srand(time(0));
 	  int num = (rand() % (10000 - 100 + 1)) + 100;
 	  HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_14);
+
+	  int czasZeStruct = timespec_get(&ts, TIME_UTC);
+	  wr_czas_us czasUS = czas.ts_do_wr_czas(&czasZeStruct);
+
+
+
 	  osDelay(num);
   }
   osThreadTerminate(NULL);
