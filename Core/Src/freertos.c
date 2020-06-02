@@ -23,7 +23,6 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include "wr_czas.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
@@ -31,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "wr_czas.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,23 +53,16 @@
 ADC_HandleTypeDef hadc1;
 UART_HandleTypeDef huart1;
 
-struct wr_czas czas;
-
-uint16_t raw;
-char msg[10];
 /* USER CODE END Variables */
 osThreadId blink01Handle;
 osThreadId blink02Handle;
-osThreadId blink03Handle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-   
 /* USER CODE END FunctionPrototypes */
 
 void StartBlink01(void const * argument);
 void StartBlink02(void const * argument);
-void StartBlink03(void const * argument);
 
 extern void MX_USB_HOST_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -134,12 +127,8 @@ void MX_FREERTOS_Init(void) {
   blink01Handle = osThreadCreate(osThread(blink01), NULL);
 
   /* definition and creation of blink02 */
-  osThreadDef(blink02, StartBlink02, osPriorityBelowNormal, 0, 128);
+  osThreadDef(blink02, StartBlink02, osPriorityNormal, 0, 128);
   blink02Handle = osThreadCreate(osThread(blink02), NULL);
-
-  /* definition and creation of blink03 */
-  osThreadDef(blink03, StartBlink03, osPriorityNormal, 0, 128);
-  blink03Handle = osThreadCreate(osThread(blink03), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -158,6 +147,8 @@ void StartBlink01(void const * argument)
 {
   /* init code for USB_HOST */
   MX_USB_HOST_Init();
+
+  struct timespec ts;
   /* USER CODE BEGIN StartBlink01 */
   /* Infinite loop */
   for(;;)
@@ -166,12 +157,11 @@ void StartBlink01(void const * argument)
 	int num = (rand() % (10000 - 100 + 1)) + 100;
 	HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_12);
 
-	wr_czas_us aktualnyCzas = czas.czas_aktualny();
+	wr_czas_us time = czas_aktualny();
+    wr_czas_do_ts(&ts, time);
+    wr_czas_us timeChanged = ts_do_wr_czas(&ts);
 
-	osDelay(num);
-
-	HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_12);
-	int32_t roznica = czas.roznica_czasu(&aktualnyCzas);
+    printf("startBlink01: time=%lld , timeChanged=%lld\n", time, timeChanged);
 
 	osDelay(num);
   }
@@ -192,60 +182,30 @@ void StartBlink02(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-//	  HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_13);
-//	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
-//	  HAL_ADC_Start(&hadc1);
-//	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-//	  raw = HAL_ADC_GetValue(&hadc1);
-//
-//	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
-//
-//	  printf("ADC PIN SET %u \n",raw);
-	 // HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	  srand(time(0));
-	  int num = (rand() % (10000 - 100 + 1)) + 100;
-	  HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_13);
+	srand(time(0));
+	int num = (rand() % (1000 - 100 + 1)) + 100;
+    wr_czas_us timeMeasured = czas_aktualny();
+	HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_13);
+	osDelay(num);
 
-	  wr_czas_us aktualnyCzas = czas.czas_aktualny();
-
-	  osDelay(num);
+    int32_t diff = roznica_czasu(&timeMeasured);
+    printf("startBlink02: timeMeasured=%llu, delay=%d, difference=%ld\n", timeMeasured, num, diff);
+	HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_13);
+	osDelay(10);
   }
   osThreadTerminate(NULL);
   /* USER CODE END StartBlink02 */
 }
 
-/* USER CODE BEGIN Header_StartBlink03 */
-/**
-* @brief Function implementing the blink03 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartBlink03 */
-void StartBlink03(void const * argument)
-{
-	struct timespec ts;
-  /* USER CODE BEGIN StartBlink03 */
-  /* Infinite loop */
-  for(;;)
-  {
-	  srand(time(0));
-	  int num = (rand() % (10000 - 100 + 1)) + 100;
-	  HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_14);
-
-	  int czasZeStruct = timespec_get(&ts, TIME_UTC);
-	  wr_czas_us czasUS = czas.ts_do_wr_czas(&czasZeStruct);
-
-
-
-	  osDelay(num);
-  }
-  osThreadTerminate(NULL);
-  /* USER CODE END StartBlink03 */
-}
-
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-     
+int _write(int file, char *ptr, int len) {
+  /* Implement your write code here, this is used by puts and printf for example */
+  for(int i=0 ; i<len ; i++)
+    ITM_SendChar((*ptr++));
+  return len;
+}
+
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

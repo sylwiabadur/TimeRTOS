@@ -1,0 +1,4 @@
+wr_czas.c:15:12:czas_aktualny	32	static
+wr_czas.c:28:12:ts_do_wr_czas	40	static
+wr_czas.c:35:6:wr_czas_do_ts	48	static
+wr_czas.c:54:9:roznica_czasu	48	static

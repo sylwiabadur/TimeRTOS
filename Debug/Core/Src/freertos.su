@@ -1,6 +1,7 @@
-freertos.c:81:13:vApplicationStackOverflowHook	16	static
-freertos.c:93:6:vApplicationGetIdleTaskMemory	24	static
-freertos.c:107:6:MX_FREERTOS_Init	104	static
-freertos.c:154:6:StartBlink01	32	static
-freertos.c:178:6:StartBlink02	32	static
-freertos.c:210:6:StartBlink03	32	static
+core_cm4.h:2064:26:ITM_SendChar	16	static,ignoring_inline_asm
+freertos.c:77:13:vApplicationStackOverflowHook	16	static
+freertos.c:89:6:vApplicationGetIdleTaskMemory	24	static
+freertos.c:103:6:MX_FREERTOS_Init	72	static
+freertos.c:146:6:StartBlink01	72	static
+freertos.c:179:6:StartBlink02	48	static
+freertos.c:202:5:_write	32	static
